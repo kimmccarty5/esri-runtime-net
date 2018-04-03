@@ -1,4 +1,5 @@
-﻿using Esri.ArcGISRuntime.Data;
+﻿using Esri.ArcGISRuntime.ArcGISServices;
+using Esri.ArcGISRuntime.Data;
 using Esri.ArcGISRuntime.Geometry;
 using Esri.ArcGISRuntime.Mapping;
 using Esri.ArcGISRuntime.Symbology;
@@ -30,7 +31,7 @@ namespace FindNearestBar
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //Create map and add to view
-            var map = new Map(BasemapType.NavigationVector, 51.5080, -0.1281, 14);
+            var map = new Map(BasemapType.NavigationVector, 51.505978, -0.111123, 15);
             MyMapView.Map = map;
 
             //create bar symbol
@@ -40,10 +41,10 @@ namespace FindNearestBar
 
 
             //create You Are Here symbol
-            m_pmsYAH = new PictureMarkerSymbol(new Uri("http://static.arcgis.com/images/Symbols/Animated/EnlargeRotatingBlueMarkerSymbol.png"))
+            m_pmsYAH = new PictureMarkerSymbol(new Uri("http://www.free-icons-download.net/images/yellow-star-icon-9290.png"))
             {
-                Width = 25,
-                Height = 25
+                Width = 35,
+                Height = 35
             };
 
             //add bars as feature layer and render symbols
@@ -65,7 +66,7 @@ namespace FindNearestBar
             var graphic = new Graphic(point, m_pmsYAH);
 
             //create 1 mile (radius) buffer around point
-            var buffer = GeometryEngine.Buffer(point, 1609.34 / 4); 
+            var buffer = GeometryEngine.Buffer(point, 1609.34 / 2); 
 
             //create symbol for buffer
             var buffSym = new SimpleLineSymbol();
@@ -127,32 +128,36 @@ namespace FindNearestBar
             if (!(GeometryEngine.Intersects(buffer, feature.Geometry)))
                 return;
 
-            
+            //highlight closest bar
             layer.SelectFeature(feature);
             layer.SelectionColor = Colors.DarkRed;
 
-
+            //draw line to closest bar
             var linePoints = new PolylineBuilder(SpatialReferences.WebMercator);
             linePoints.AddPoint(location);
             linePoints.AddPoint(feature.Geometry as MapPoint);
             var line = linePoints.ToGeometry();
-
-            var x = (line.Extent.XMin + line.Extent.XMax) / 2;
-            var y = (line.Extent.YMin + line.Extent.YMax) / 2;
-
-            var lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.Solid, Colors.Maroon, 2);
+            
+            var lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.DashDotDot, Colors.Maroon, 2);
             var lineGraphic = new Graphic(line, lineSymbol);
             MyOverlay.Graphics.Add(lineGraphic);
 
-           // double walk = decimal.Round(shortDist / 1609.34, 2);
 
+            //create text symbol for distance at midpoint of line
+            var x = (line.Extent.XMin + line.Extent.XMax) / 2; 
+            var y = (line.Extent.YMin + line.Extent.YMax) / 2;
             var textPoint = new MapPoint(x, y);
-            var textSymbol = new TextSymbol(String.Format("{0:0.00}", shortDist / 1609.34) + " miles", Colors.Black, 15, Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Center, Esri.ArcGISRuntime.Symbology.VerticalAlignment.Baseline);
+            var text = String.Format("{0:0.00}", shortDist / 1609.34) + " miles";
+            var textSymbol = new TextSymbol(text, Colors.Black, 15, Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Center, Esri.ArcGISRuntime.Symbology.VerticalAlignment.Baseline);
             textSymbol.FontWeight = Esri.ArcGISRuntime.Symbology.FontWeight.Bold;
             textSymbol.BackgroundColor = Colors.Maroon;
             //textSymbol.Angle = Math.Atan2(line.Extent.YMax - line.Extent.YMin, line.Extent.XMax - line.Extent.XMin) * 180.0 / Math.PI;
             var textGraphic = new Graphic(textPoint, textSymbol);
             MyOverlay.Graphics.Add(textGraphic);
+            
+
+
+
         }
     }
 }
