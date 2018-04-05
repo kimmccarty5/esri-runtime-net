@@ -65,8 +65,9 @@ namespace FindNearestBar
             var point = e.Location;
             var graphic = new Graphic(point, m_pmsYAH);
 
+            int mile = 4;
             //create 1 mile (radius) buffer around point
-            var buffer = GeometryEngine.Buffer(point, 1609.34 / 2); 
+            var buffer = GeometryEngine.Buffer(point, 1609.34 / mile); 
 
             //create symbol for buffer
             var buffSym = new SimpleLineSymbol();
@@ -98,6 +99,11 @@ namespace FindNearestBar
             var table = layer.FeatureTable;
             var results = await table.QueryFeaturesAsync(query);
             layer.ClearSelection();
+
+
+            /* // ===================================================================
+               //                       Single Closest Bar
+               // -------------------------------------------------------------------
 
             double shortDist = -1;
             Feature feature = null;
@@ -150,12 +156,102 @@ namespace FindNearestBar
             var text = String.Format("{0:0.00}", shortDist / 1609.34) + " miles";
             var textSymbol = new TextSymbol(text, Colors.Black, 15, Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Center, Esri.ArcGISRuntime.Symbology.VerticalAlignment.Baseline);
             textSymbol.FontWeight = Esri.ArcGISRuntime.Symbology.FontWeight.Bold;
-            textSymbol.BackgroundColor = Colors.Maroon;
+            //textSymbol.BackgroundColor = Colors.Maroon;
             //textSymbol.Angle = Math.Atan2(line.Extent.YMax - line.Extent.YMin, line.Extent.XMax - line.Extent.XMin) * 180.0 / Math.PI;
             var textGraphic = new Graphic(textPoint, textSymbol);
             MyOverlay.Graphics.Add(textGraphic);
+
+            //===================================================================*/
             
 
+
+            //==================================================================
+            //                    Two Closest Bars
+            //------------------------------------------------------------------
+
+            double[] shortDist = { -1, -1 };
+            Feature[] feature = new Feature[2];
+            System.Diagnostics.Debug.WriteLine("#1: shortdist is at: " + shortDist[0].ToString() + " " + shortDist[1].ToString());
+
+            //check for closest bars within buffer
+            foreach (var item in results)
+            {
+                var calcDistance = GeometryEngine.Distance(location, item.Geometry);
+                System.Diagnostics.Debug.WriteLine("feature distance: " + (calcDistance/1609.34).ToString() + " meters; shordist = " + shortDist[0].ToString() + " " + shortDist[1].ToString());
+                if (shortDist[0] == -1)
+                {
+                    shortDist[0] = calcDistance;
+                    System.Diagnostics.Debug.WriteLine("setting first");
+                    feature[0] = item;
+                    continue;
+                }
+                if(shortDist[1] == -1)
+                {
+                    System.Diagnostics.Debug.WriteLine("setting second");
+                    shortDist[1] = calcDistance;
+                    feature[1] = item;
+                    continue;
+                }
+
+                if (calcDistance < shortDist[0])
+                {
+                    System.Diagnostics.Debug.WriteLine("less than first");
+                    shortDist[1] = shortDist[0];
+                    feature[1] = feature[0];
+                    shortDist[0] = calcDistance;
+                    feature[0] = item;
+                }
+                else if (calcDistance < shortDist[1])
+                {
+                    System.Diagnostics.Debug.WriteLine("less than second");
+                    shortDist[1] = calcDistance;
+                    feature[1] = item;
+                }
+            }
+
+            //exit if no closest bar
+            if (feature[0] == null || feature[1] == null)
+                return;
+
+            if (!(GeometryEngine.Intersects(buffer, feature[0].Geometry)))
+                return;
+
+            //highlight closest bar
+            for (int i = 0; i < 2; i++)
+            {
+                layer.SelectFeature(feature[i]);
+                layer.SelectionColor = Colors.DarkRed;
+
+                //draw line to closest bar
+                var linePoints = new PolylineBuilder(SpatialReferences.WebMercator);
+                linePoints.AddPoint(location);
+                linePoints.AddPoint(feature[i].Geometry as MapPoint);
+                var line = linePoints.ToGeometry();
+
+                var lineSymbol = new SimpleLineSymbol(SimpleLineSymbolStyle.DashDotDot, Colors.Maroon, 2);
+                var lineGraphic = new Graphic(line, lineSymbol);
+                MyOverlay.Graphics.Add(lineGraphic);
+                
+                //create text symbol for distance at midpoint of line
+                var x = (line.Extent.XMin + line.Extent.XMax) / 2;
+                var y = (line.Extent.YMin + line.Extent.YMax) / 2;
+                var textPoint = new MapPoint(x, y);
+                var text = String.Format("{0:0.00}", shortDist[i] / 1609.34) + " miles";
+                var textSymbol = new TextSymbol(text, Colors.Black, 15, Esri.ArcGISRuntime.Symbology.HorizontalAlignment.Center, Esri.ArcGISRuntime.Symbology.VerticalAlignment.Baseline);
+                textSymbol.FontWeight = Esri.ArcGISRuntime.Symbology.FontWeight.Bold;
+                //textSymbol.BackgroundColor = Colors.Maroon;
+                //textSymbol.Angle = Math.Atan2(line.Extent.YMax - line.Extent.YMin, line.Extent.XMax - line.Extent.XMin) * 180.0 / Math.PI;
+                var textGraphic = new Graphic(textPoint, textSymbol);
+                MyOverlay.Graphics.Add(textGraphic);
+            }
+            
+
+            
+
+            
+
+
+            
 
 
         }
