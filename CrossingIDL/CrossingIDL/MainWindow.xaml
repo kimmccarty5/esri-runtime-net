@@ -23,13 +23,13 @@
                 <esri:GraphicsOverlay x:Name="graphicsOverlay1" />
             </esri:MapView.GraphicsOverlays>
         </esri:MapView>
-        <Button x:Name="Btn1" Grid.Column="0" Grid.Row="1" Content="Zoom to Fiji by Part"/>
+        <Button x:Name="Btn1" Grid.Column="0" Grid.Row="1" Content="Zoom to Fiji"/>
         <esri:MapView x:Name="MyMapView2" Grid.Column="1" Grid.Row="0">
             <esri:Map/>
             <esri:MapView.GraphicsOverlays>
                 <esri:GraphicsOverlay x:Name="graphicsOverlay2" />
             </esri:MapView.GraphicsOverlays>
         </esri:MapView>
-        <Button x:Name="Btn2" Grid.Column="1" Grid.Row="1" Content="Zoom to Fiji"/>
+        <Button x:Name="Btn2" Grid.Column="1" Grid.Row="1" Content="Zoom to Fiji (Area highlighted)"/>
     </Grid>
 </Window>

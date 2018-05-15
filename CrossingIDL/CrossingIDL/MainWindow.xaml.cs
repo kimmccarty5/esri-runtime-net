@@ -56,13 +56,13 @@ namespace CrossingIDL
         {
             
             
-            MyMapView1.Map = new Map(Basemap.CreateTopographic());
+            MyMapView1.Map = new Map(Basemap.CreateImageryWithLabels());
             MyMapView1.WrapAroundMode = WrapAroundMode.EnabledWhenSupported;
-            createPolygon(graphicsOverlay1);
+            //createPolygon(graphicsOverlay1);
             
            
 
-            MyMapView2.Map = new Map(Basemap.CreateTerrainWithLabels());
+            MyMapView2.Map = new Map(Basemap.CreateTopographic());
             MyMapView2.WrapAroundMode = WrapAroundMode.EnabledWhenSupported;
             createPolygon(graphicsOverlay2);
 
@@ -81,14 +81,6 @@ namespace CrossingIDL
         }
         public void ZoomToEnvelope(double xMin, double yMin, double xMax, double yMax, MapView MyMapView)
         {
-            Envelope envelope = new Envelope(xMin+2, yMin, 180, yMax, SpatialReferences.Wgs84);
-            MyMapView.SetViewpointGeometryAsync(envelope);
-
-        }
-
-        public void ZoomToEnvelope(Geometry geometry, MapView MyMapView)
-        {
-            //MyMapView1.SetViewpointGeometryAsync(new Polygon((geometry as Polygon).Parts.Last().Points, geometry.SpatialReference));
             var p1 = new PolygonBuilder(SpatialReferences.Wgs84);
             var lnSym1 = new SimpleLineSymbol(SimpleLineSymbolStyle.Dash, Colors.Red, 2);
             p1.AddPoint(xMin, yMin);
@@ -96,12 +88,20 @@ namespace CrossingIDL
             p1.AddPoint(180, yMax);
             p1.AddPoint(180, yMin);
             var rec = new Graphic(p1.ToGeometry(), lnSym1);
-            
-            graphicsOverlay1.Graphics.Add(rec);
 
-            Envelope envelope = new Envelope(xMin+1.6, yMin, 180.0, yMax, SpatialReferences.Wgs84);
+            graphicsOverlay2.Graphics.Add(rec);
+
+            Envelope envelope = new Envelope(xMin + 1.6, yMin, 180.0, yMax, SpatialReferences.Wgs84);
             MyMapView.SetViewpointGeometryAsync(envelope);
-            
+        }
+
+        public void ZoomToEnvelope(Geometry geometry, MapView MyMapView)
+        {
+            //MyMapView1.SetViewpointGeometryAsync(new Polygon((geometry as Polygon).Parts.Last().Points, geometry.SpatialReference));
+
+            Envelope envelope = new Envelope(xMin + 2, yMin, 180, yMax, SpatialReferences.Wgs84);
+            MyMapView.SetViewpointGeometryAsync(envelope);
+
         }
 
     }
