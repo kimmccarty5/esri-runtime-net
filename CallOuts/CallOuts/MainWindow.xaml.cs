@@ -21,6 +21,8 @@ namespace CallOuts
 
         public MainWindow()
         {
+            string licenseKey = "runtimelite,1000,rud549870135,16-oct-2018,1JPJD4SZ8LLF663PR217";
+            Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.SetLicense(licenseKey);
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
         }

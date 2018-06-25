@@ -30,6 +30,6 @@
                 <esri:GraphicsOverlay x:Name="graphicsOverlay2" />
             </esri:MapView.GraphicsOverlays>
         </esri:MapView>
-        <Button x:Name="Btn2" Grid.Column="1" Grid.Row="1" Content="Zoom to Fiji (Area highlighted)"/>
+        <Button x:Name="Btn2" Grid.Column="1" Grid.Row="1" Content="Zoom to Fiji by Part (Highligh part used)"/>
     </Grid>
 </Window>
